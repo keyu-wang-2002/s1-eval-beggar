@@ -2,6 +2,7 @@
 
 **Alter GPT-4o-mini with free GLM4-Z1-FLASH for LLM-as-a-Judge**
 
+Only modify "./eval" folder for evaluation. Others are the same with the original codebase: https://github.com/simplescaling/s1
 
 ### Citation
 
