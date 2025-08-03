@@ -5,6 +5,9 @@
 </div>
 <br>
 
+**Alter GPT-4o-mini with free GLM4-Z1-FLASH**
+
+
 ![](visuals/scaling.png)
 
 ****************************************************************
