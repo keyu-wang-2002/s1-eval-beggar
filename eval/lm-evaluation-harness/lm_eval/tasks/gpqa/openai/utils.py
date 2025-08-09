@@ -8,6 +8,7 @@ import re
 import datasets
 import openai
 from openai import OpenAI
+from zhipuai import ZhipuAI
 
 QUERY_TEMPLATE = "{Question}\n\nA) {choice1}\nB) {choice2}\nC) {choice3}\nD) {choice4}"
 QUERY_TEMPLATE_API = "{Question}\nAnswer Choices:\n(A) {choice1}\n(B) {choice2}\n(C) {choice3}\n(D) {choice4}"
@@ -100,9 +101,17 @@ class ChatCompletionSampler:
         temperature: float = 0.5,
         max_tokens: int = 1024,
     ):
-        self.api_key_name = "OPENAI_API_KEY"
-        self.client = OpenAI()
+        # self.api_key_name = "OPENAI_API_KEY"
+        # self.client = OpenAI()
         # using api_key=os.environ.get("OPENAI_API_KEY")  # please set your API_KEY
+        if model.lower().startswith("glm-4.5"):
+            self.api_type = "zhipu"
+            self.api_key_name = "ZHIPU_API_KEY"
+            self.client = ZhipuAI(api_key=os.environ.get(self.api_key_name))
+        else:
+            self.api_type = "openai"
+            self.api_key_name = "OPENAI_API_KEY"
+            self.client = OpenAI(api_key=os.environ.get(self.api_key_name))
         self.model = model
         self.system_message = system_message
         self.temperature = temperature
@@ -132,13 +141,30 @@ class ChatCompletionSampler:
         trial = 0
         while True:
             try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=message_list,
-                    temperature=self.temperature,
-                    max_tokens=self.max_tokens,
-                )
-                return response.choices[0].message.content
+                # response = self.client.chat.completions.create(
+                #     model=self.model,
+                #     messages=message_list,
+                #     temperature=self.temperature,
+                #     max_tokens=self.max_tokens,
+                # )
+                # return response.choices[0].message.content
+                if self.api_type == "openai":
+                    response = self.client.chat.completions.create(
+                        model=self.model,
+                        messages=message_list,
+                        temperature=self.temperature,
+                        max_tokens=self.max_tokens,
+                    )
+                    return response.choices[0].message.content
+
+                elif self.api_type == "zhipu":
+                    response = self.client.chat.completions.create(
+                        model=self.model,
+                        messages=message_list,
+                        temperature=self.temperature,
+                        max_tokens=self.max_tokens,
+                    )
+                    return response.choices[0].message
             # NOTE: BadRequestError is triggered once for MMMU, please uncomment if you are reruning MMMU
             except openai.BadRequestError as e:
                 print("Bad Request Error", e)
@@ -169,6 +195,9 @@ def process_results(doc: dict, results: List[str]) -> Dict[str, int]:
 
     if os.getenv("PROCESSOR", "") == "gpt-4o-mini":
         sampler = ChatCompletionSampler(model="gpt-4o-mini")
+        question = QUERY_TEMPLATE_API.format(Question=doc["Question"], choice1=doc["choice1"], choice2=doc["choice2"], choice3=doc["choice3"], choice4=doc["choice4"])
+    elif os.getenv("PROCESSOR", "") == "GLM-4.5-Flash":
+        sampler = ChatCompletionSampler(model="GLM-4.5-Flash")
         question = QUERY_TEMPLATE_API.format(Question=doc["Question"], choice1=doc["choice1"], choice2=doc["choice2"], choice3=doc["choice3"], choice4=doc["choice4"])
     else:
         print(f"Unknown processor: {os.getenv('PROCESSOR')}; set 'PROCESSOR=gpt-4o-mini' and 'OPENAI_API_KEY=YOUR_KEY' for best results.")
