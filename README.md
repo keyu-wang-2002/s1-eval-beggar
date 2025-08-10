@@ -1,8 +1,16 @@
 
 
-**Alter GPT-4o-mini with free GLM4-Z1-FLASH in LLM-as-a-Judge**
+**Alter GPT-4o-mini with free GLM4-Z1-Flash in LLM-as-a-Judge**
 
 Only modify "./eval" folder for evaluation. Others are the same with the original codebase: https://github.com/simplescaling/s1
+
+Start:
+
+```
+cd eval/lm-evaluation-harness
+pip install -e .[math,vllm]
+pip install zhipuai
+```
 
 ### Citation
 
