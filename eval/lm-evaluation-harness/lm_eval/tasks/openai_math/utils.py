@@ -139,7 +139,7 @@ class ChatCompletionSampler:
 
     def __init__(
         self,
-        model: str = "gpt-4o-mini",
+        model: str = "GLM-4.5-Flash",
         system_message: str | None = None,
         temperature: float = 0.5,
         max_tokens: int = 1024,
