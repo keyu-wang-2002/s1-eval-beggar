@@ -1,6 +1,6 @@
 tag:
   - math_word_problems
-task: aime24_nofigures
+task: aime24_nofigures_pass8
 dataset_path: simplescaling/aime24_nofigures
 dataset_name: default
 process_docs: !function utils.process_docs
