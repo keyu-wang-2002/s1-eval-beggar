@@ -1,0 +1,42 @@
+tag:
+  - math_word_problems
+task: aime24_nofigures
+dataset_path: simplescaling/aime24_nofigures
+dataset_name: default
+process_docs: !function utils.process_docs
+output_type: generate_until
+test_split: train
+doc_to_text: !function utils.doc_to_text
+doc_to_target: answer
+process_results: !function utils.process_results
+
+generation_kwargs:
+  until: []
+  do_sample: true        # 建议开启采样以体现 pass@k 的意义
+  temperature: 0.7       # 可按需调整
+  max_gen_toks: 32768
+
+repeats: 8               # 至少等于最大的 k（这里为 8）
+
+filter_list:
+  - name: "all"
+    filter:
+      - function: "take_first_k"
+        k: 8             # 取每题前 8 个样本参与统计
+
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+  - metric: pass@4
+    aggregation: mean
+    higher_is_better: true
+  - metric: pass@8
+    aggregation: mean
+    higher_is_better: true
+  - metric: extracted_answers
+    aggregation: bypass
+    higher_is_better: true
+
+metadata:
+  version: 1.0
