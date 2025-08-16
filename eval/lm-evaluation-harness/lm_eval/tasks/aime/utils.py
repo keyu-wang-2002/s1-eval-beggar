@@ -211,7 +211,13 @@ class ChatCompletionSampler:
                         temperature=self.temperature,
                         max_tokens=self.max_tokens,
                     )
-                    return response.choices[0].message
+            
+                    msg = response.choices[0].message
+                    # 兼容 dict 或 pydantic/对象
+                    if isinstance(msg, dict):
+                        return msg.get("content", "")
+                    else:
+                        return getattr(msg, "content", "")
             # NOTE: BadRequestError is triggered once for MMMU, please uncomment if you are reruning MMMU
             except openai.BadRequestError as e:
                 print("Bad Request Error", e)
